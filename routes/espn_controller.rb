@@ -9,6 +9,8 @@ module ESPN
 
   class Connector < Grape::API
 
+    version 'v1', :using => :path # This is our API version, not ESPN's
+
     format :json
     before do
       # FIXME: Change this to support only connections from the frontend
@@ -25,23 +27,27 @@ module ESPN
       end
     end
 
-    options 'headline' do end
-
+    options '/sports/basketball/:league_name/news/:page' do end
     desc "Retrieve info from ESPN"
     params do
       requires :league_name, :type => String, :desc => "League Name"
       optional :limit, :type => Integer, :desc => "Max # of entries"
-      optional :offset, :type => Integer, :desc => "Offset # of entries"
+      optional :page, :type => Integer, :desc => ":page*5 Offset # of entries"
     end
-    get '/sports/basketball/:league_name/news' do
+    get '/sports/basketball/:league_name/news/:page' do
+      puts 'going in...'
+      params[:league_name] ||= 'nba'
       params[:limit] ||= 5
-      params[:offset] ||= 0
+      params[:page] ||= 0
+      offset = params[:page]*5
       http = Net::HTTP.new(ESPN::ESPN_SERVER)
-      api_params = "limit=#{params[:limit]}&offset=#{params[:offset]}&apikey=#{ESPN::API_KEY}"
+      api_params = "limit=#{params[:limit]}&offset=#{offset}&apikey=#{ESPN::API_KEY}"
       puts api_params
       puts "/#{ESPN::API_VERSION}/sports/basketball/#{params[:league_name]}/news#{api_params}"
       request = Net::HTTP::Get.new("/#{ESPN::API_VERSION}/sports/basketball/#{params[:league_name]}/news?#{api_params}")
-      present http.request(request).body
+      response = http.request(request).body
+      puts response
+      present response
     end
 
   end
