@@ -1,0 +1,10 @@
+development:
+  api_key: 'f62463q27p7aa8umzu74tk6m'
+  espn_server: 'api.espn.com'
+  api_version: 'v1'
+
+testing:
+  << development
+
+production:
+  << development
