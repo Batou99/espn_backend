@@ -41,6 +41,7 @@ module ESPN
       present LEAGUES.to_json
     end
 
+
     options '/sports/basketball/:league_name/teams/:id/news' do end
     desc "Retrieve info from ESPN: News from a team"
     params do
