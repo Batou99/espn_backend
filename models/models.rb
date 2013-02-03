@@ -74,6 +74,7 @@ class Team
   attr_accessor :id
   attr_accessor :abbr
   attr_accessor :color
+  attr_accessor :location
   attr_accessor :headlines_url
 
   def self.from_json(data)
@@ -82,6 +83,7 @@ class Team
     team.id = data["id"]
     team.abbr = data["abbreviation"]
     team.color = data["color"]
+    team.location = data["location"]
     team.headlines_url = data["links"]["api"]["news"]["href"]
     team
   end
