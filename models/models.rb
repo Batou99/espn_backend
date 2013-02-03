@@ -23,11 +23,18 @@ class Leagues < Array
     leagues
   end
 
-  def self.load
-    api_params = "apikey=#{API_KEY}"
-    http = Net::HTTP.new(ESPN_SERVER)
-    request = Net::HTTP::Get.new("/#{API_VERSION}/sports/basketball/teams/?#{api_params}")
-    Leagues.from_json(http.request(request).body)
+  # In real life we would load data in parts instead of chaining everything 
+  # from here
+  def self.load(retries=3)
+    raise "Impossible to load data, try again later" if retries<1
+    begin
+      api_params = "apikey=#{API_KEY}"
+      http = Net::HTTP.new(ESPN_SERVER)
+      request = Net::HTTP::Get.new("/#{API_VERSION}/sports/basketball/teams/?#{api_params}")
+      Leagues.from_json(http.request(request).body)
+    rescue
+      load(retries-1)
+    end
   end
 end
 
