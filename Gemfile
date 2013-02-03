@@ -4,9 +4,7 @@ source "http://gems.github.com"
 gem 'thin'
 gem "grape"
 gem "logger"
-
 gem "json"
-gem "activeresource"
 
 group :development, :test do
   gem "factory_girl", "~> 4.0"

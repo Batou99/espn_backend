@@ -1,4 +1,3 @@
-require 'active_resource'
 require "net/http"
 
 env = ENV['RACK_ENV'] || 'development'
@@ -88,3 +87,36 @@ class Team
     team
   end
 end
+
+class Headline
+  attr_accessor :link_text
+  attr_accessor :description
+  attr_accessor :image
+
+  def self.create(data)
+    headline = Headline.new
+    headline.link_text = data["linkText"]
+    headline.description = data["description"]
+    begin
+      headline.image = data["images"][0]["url"]
+    rescue
+    end
+    headline
+  end
+end
+
+class Headlines < Array
+  def self.load(league,team_id,limit)
+    http = Net::HTTP.new(ESPN_SERVER)
+    api_params = "limit=#{limit}&apikey=#{API_KEY}"
+    request = Net::HTTP::Get.new("/#{API_VERSION}/sports/basketball/#{league}/teams/#{team_id}/news/?#{api_params}")
+    response = http.request(request).body
+    parsed_response = JSON.parse(response)
+    headlines = Headlines.new
+    parsed_response["headlines"].each { |headline|  
+      headlines << Headline.create(headline)
+    }
+    headlines
+  end
+end
+
