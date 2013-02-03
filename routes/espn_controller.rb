@@ -41,25 +41,17 @@ module ESPN
       present LEAGUES.to_json
     end
 
-    options '/sports/basketball/:league_name/news/:page' do end
-    desc "Retrieve info from ESPN"
+    options '/sports/basketball/:league_name/teams/:id/news' do end
+    desc "Retrieve info from ESPN: News from a team"
     params do
       requires :league_name, :type => String, :desc => "League Name"
+      requires :id, :type => Integer, :desc => "Team id"
       optional :limit, :type => Integer, :desc => "Max # of entries"
-      optional :page, :type => Integer, :desc => ":page*5 Offset # of entries"
     end
-    get '/sports/basketball/:league_name/news/:page' do
+    get '/sports/basketball/:league_name/teams/:id/news' do
       params[:league_name] ||= 'nba'
       params[:limit] ||= 5
-      params[:page] ||= 0
-      offset = params[:page]*5
-      http = Net::HTTP.new(ESPN::ESPN_SERVER)
-      api_params = "limit=#{params[:limit]}&offset=#{offset}&apikey=#{ESPN::API_KEY}"
-      puts api_params
-      puts "/#{ESPN::API_VERSION}/sports/basketball/#{params[:league_name]}/news#{api_params}"
-      request = Net::HTTP::Get.new("/#{ESPN::API_VERSION}/sports/basketball/#{params[:league_name]}/news?#{api_params}")
-      response = http.request(request).body
-      present response
+      present Headlines.load(params[:league_name],params[:id],params[:limit]).to_json
     end
 
   end
