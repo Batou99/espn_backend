@@ -1,1 +1,1 @@
-require_relative 'headline'
+require_relative 'models'

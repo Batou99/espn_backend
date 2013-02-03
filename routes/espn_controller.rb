@@ -1,4 +1,5 @@
 require "net/http"
+require_relative "../models/models"
 
 module ESPN
   env = ENV['RACK_ENV'] || 'development'
@@ -6,6 +7,8 @@ module ESPN
   API_KEY = config["api_key"]
   ESPN_SERVER = config["espn_server"]
   API_VERSION = config["api_version"]
+  puts "Preloading leagues data..."
+  LEAGUES ||= Leagues.load # Preload Leagues data on start
 
   class Connector < Grape::API
 
@@ -27,6 +30,17 @@ module ESPN
       end
     end
 
+    options '/sports/basketball/leagues_and_teams' do end
+    desc "Retrieve info from ESPN"
+    params do
+    end
+    get '/sports/basketball/leagues_and_teams' do
+      # We cache the results because the teams won't change much
+      # In a real scenario, we would use something like memechache
+      # with expires
+      present LEAGUES.to_json
+    end
+
     options '/sports/basketball/:league_name/news/:page' do end
     desc "Retrieve info from ESPN"
     params do
@@ -35,7 +49,6 @@ module ESPN
       optional :page, :type => Integer, :desc => ":page*5 Offset # of entries"
     end
     get '/sports/basketball/:league_name/news/:page' do
-      puts 'going in...'
       params[:league_name] ||= 'nba'
       params[:limit] ||= 5
       params[:page] ||= 0
@@ -46,7 +59,6 @@ module ESPN
       puts "/#{ESPN::API_VERSION}/sports/basketball/#{params[:league_name]}/news#{api_params}"
       request = Net::HTTP::Get.new("/#{ESPN::API_VERSION}/sports/basketball/#{params[:league_name]}/news?#{api_params}")
       response = http.request(request).body
-      puts response
       present response
     end
 
